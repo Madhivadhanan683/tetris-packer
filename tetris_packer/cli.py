@@ -4,14 +4,14 @@ Command-line entry point for the Tetris Packing challenge.
 """
 
 import argparse
-import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 import csv
+import matplotlib.pyplot as plt
 
 from . import shapes
 from . import solver_greedy
+from .visualize import animate_block_placement  # Import animation function
 
 
 def save_grid_csv(grid: np.ndarray, path: str) -> None:
@@ -31,9 +31,8 @@ def visualize_grid(grid: np.ndarray, title: str = "Packed Grid") -> None:
         if pid == 0:
             continue
         mask = (grid == pid)
-        # color index cycles through cmap
-        color = cmap(pid % 20)
         y, x = np.where(mask)
+        color = cmap(pid % 20)
         plt.scatter(x, -y, c=[color], s=200, marker="s")  # flip y for proper orientation
     plt.title(title)
     plt.axis("equal")
@@ -47,6 +46,7 @@ def main(argv=None):
     parser.add_argument("--output", "-o", default="packed_grid.csv", help="Output CSV file path.")
     parser.add_argument("--time", type=float, default=5.0, help="Time limit per width (seconds).")
     parser.add_argument("--no-viz", action="store_true", help="Skip visualization.")
+    parser.add_argument("--animate", action="store_true", help="Animate block placement and save GIF")
     args = parser.parse_args(argv)
 
     # --- Load shapes ---
@@ -75,6 +75,8 @@ def main(argv=None):
     # --- Visualization ---
     if not args.no_viz:
         visualize_grid(grid, f"Packed {H}x{W}, Aspect={aspect:.2f}")
+        if args.animate:
+            animate_block_placement(grid, output_path="packed_blocks.gif")
 
 
 if __name__ == "__main__":
