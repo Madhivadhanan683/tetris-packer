@@ -41,3 +41,28 @@ def animate_packing(placements, H, W, save_path="tetris_anim.gif"):
     ani = animation.ArtistAnimation(fig, ims, interval=500, blit=True)
     ani.save(save_path, writer="pillow")
     print(f"Saved animation to {save_path}")
+
+def animate_block_placement(grid: np.ndarray, output_path="tetris_anim.gif"):
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+
+    H, W = grid.shape
+    unique_ids = sorted(set(grid.flatten()) - {0})
+
+    anim_grid = np.zeros_like(grid)
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(anim_grid, cmap=plt.cm.get_cmap("tab20", 20), vmin=0, vmax=20)
+    ax.axis("off")
+
+    def update(frame):
+        block_id = unique_ids[frame]
+        positions = np.where(grid == block_id)
+        anim_grid[positions] = block_id
+        im.set_data(anim_grid)
+        ax.set_title(f"Placing block ID {block_id}")
+        return [im]
+
+    ani = animation.FuncAnimation(fig, update, frames=len(unique_ids), interval=500, blit=True)
+    ani.save(output_path, writer="pillow")
+    plt.show()
